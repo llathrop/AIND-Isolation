@@ -16,14 +16,17 @@ class IsolationTest(unittest.TestCase):
 
     def setUp(self):
         reload(game_agent)
-        self.player1 = MinimaxPlayer()
+        self.player1 = game_agent.MinimaxPlayer()
         self.player2 = "Player2"
         self.game = isolation.Board(self.player1, self.player2)
         
     def test_MinimaxPlayer(self):
-        print(self.game.print_board())
-        #self.player1.minimax( self.game, depth=1)
         self.assertIsNone(print("test_MinimaxPlayer"))
+        self.game.apply_move((2, 3))
+        self.game.apply_move((0, 5))
+        print(self.game.to_string())
+        self.player1.minimax( self.game, depth=1)
+        
 
 
 if __name__ == '__main__':

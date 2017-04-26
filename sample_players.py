@@ -250,7 +250,10 @@ class HumanPlayer():
                 print('Invalid index! Try again.')
 
         return legal_moves[index]
-
+    
+    
+from game_agent import (MinimaxPlayer, AlphaBetaPlayer, custom_score,
+                        custom_score_2, custom_score_3)
 
 if __name__ == "__main__":
     from isolation import Board
@@ -258,6 +261,7 @@ if __name__ == "__main__":
     # create an isolation board (by default 7x7)
     player1 = RandomPlayer()
     player2 = GreedyPlayer()
+    player1=MinimaxPlayer()
     game = Board(player1, player2)
 
     # place player 1 on the board at row 2, column 3, then place player 2 on
