@@ -87,10 +87,11 @@ def play_round(cpu_agent, test_agents, win_counts, num_matches):
         for game in games:
             winner, _, termination,state_hist = game.play(time_limit=TIME_LIMIT)
             win_counts[winner] += 1
+            filename="./game_state_data/game_state"+str(random.randint(1, 1000000000))+str(win_counts[winner])+".pckl"
             if winner == game._player_1:
-                save_game(state_hist,1,"game_state"+str(random.randint(1, 10000000))+str(win_counts[winner])+".pckl")
+                save_game(state_hist,1,filename)
             else:
-                save_game(state_hist,2,"game_state"+str(random.randint(1, 10000000))+str(win_counts[winner])+".pckl")
+                save_game(state_hist,2,filename)
 
         if termination == "timeout":
             timeout_count += 1
