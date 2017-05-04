@@ -280,7 +280,7 @@ def to_string(state, symbols=['1', '2']): #stolen from isolation.py
         out += '\n\r'
     
     return out
-def save_game(state_hist,winner,game_id):
+def save_game(state_hist,winner,game_file):
     """ Save the state of the game and the winner 
     preserve the game to a file for later analysis
     each row in the file is the game state.
@@ -288,13 +288,13 @@ def save_game(state_hist,winner,game_id):
     """
     import pickle
     try:
-        with open(game_id, 'wb') as f:
+        with open(game_file, 'wb') as f:
             pickle.dump((state_hist,winner),f)
     except:
         return "failed"
     return "success"
 
-def load_game(game_id):
+def load_game(game_file):
     """ load the state of the game and the winner 
     load the game from a file for later analysis
     each row in the file is the game state.
@@ -302,7 +302,7 @@ def load_game(game_id):
     """
     import pickle
     try:
-        with open(game_id, 'rb') as f:
+        with open(game_file, 'rb') as f:
             state=pickle.load(f)
     except:
         return "failed",_
