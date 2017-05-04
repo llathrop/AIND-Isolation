@@ -98,5 +98,7 @@ ENV/
 .zip
 #frm udacity submit
 .json
+#pickle
+.pckl
 
 # End of https://www.gitignore.io/api/python
