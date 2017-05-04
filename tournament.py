@@ -23,7 +23,7 @@ from sample_players import (RandomPlayer, open_move_score,
 from game_agent import (MinimaxPlayer, AlphaBetaPlayer, custom_score,
                         custom_score_2, custom_score_3)
 
-NUM_MATCHES = 10  # number of matches against each opponent
+NUM_MATCHES = 500  # number of matches against each opponent
 TIME_LIMIT = 150  # number of milliseconds before timeout
 
 DESCRIPTION = """
@@ -34,6 +34,33 @@ Iterative Deepening and the custom_score function defined in game_agent.py.
 
 Agent = namedtuple("Agent", ["player", "name"])
 
+def save_game(state_hist,winner,game_id):
+    """ Save the state of the game and the winner 
+    preserve the game to a file for later analysis
+    each row in the file is the game state.
+    row has format [gamestate],player_num_of_winner
+    """
+    import pickle
+    try:
+        with open(game_id, 'wb') as f:
+            pickle.dump((state_hist,winner),f)
+    except:
+        return "failed"
+    return "success"
+
+def load_game(game_id):
+    """ load the state of the game and the winner 
+    load the game from a file for later analysis
+    each row in the file is the game state.
+    row has format [gamestate],player_num_of_winner
+    """
+    import pickle
+    try:
+        with open(game_id, 'rb') as f:
+            state=pickle.load(f)
+    except:
+        return "failed",_
+    return "success",state
 
 def play_round(cpu_agent, test_agents, win_counts, num_matches):
     """Compare the test agents to the cpu agent in "fair" matches.
@@ -58,8 +85,12 @@ def play_round(cpu_agent, test_agents, win_counts, num_matches):
 
         # play all games and tally the results
         for game in games:
-            winner, _, termination = game.play(time_limit=TIME_LIMIT)
+            winner, _, termination,state_hist = game.play(time_limit=TIME_LIMIT)
             win_counts[winner] += 1
+            if winner == game._player_1:
+                save_game(state_hist,1,"game_state"+str(random.randint(1, 10000000))+str(win_counts[winner])+".pckl")
+            else:
+                save_game(state_hist,2,"game_state"+str(random.randint(1, 10000000))+str(win_counts[winner])+".pckl")
 
         if termination == "timeout":
             timeout_count += 1
@@ -138,11 +169,11 @@ def main():
     # Define a collection of agents to compete against the test agents
     cpu_agents = [
         Agent(RandomPlayer(), "Random"),
-        Agent(MinimaxPlayer(score_fn=open_move_score), "MM_Open"),
-        Agent(MinimaxPlayer(score_fn=center_score), "MM_Center"),
+        #Agent(MinimaxPlayer(score_fn=open_move_score), "MM_Open"),
+        #Agent(MinimaxPlayer(score_fn=center_score), "MM_Center"),
         Agent(MinimaxPlayer(score_fn=improved_score), "MM_Improved"),
         Agent(AlphaBetaPlayer(score_fn=open_move_score), "AB_Open"),
-        Agent(AlphaBetaPlayer(score_fn=center_score), "AB_Center"),
+        #Agent(AlphaBetaPlayer(score_fn=center_score), "AB_Center"),
         Agent(AlphaBetaPlayer(score_fn=improved_score), "AB_Improved")
     ]
 

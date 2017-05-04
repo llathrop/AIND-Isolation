@@ -49,7 +49,7 @@ def custom_score(game, player):
     
     moves_left = len(game.get_blank_spaces())
     
-    return float(own_moves**2 - opp_moves**2)/moves_left
+    return float(own_moves**2 - opp_moves**2)/moves_left**2
 
 
 def custom_score_2(game, player):

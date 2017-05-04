@@ -313,6 +313,7 @@ class Board(object):
             (e.g., timeout or invalid move).
         """
         move_history = []
+        state_history = []
 
         time_millis = lambda: 1000 * timeit.default_timer()
 
@@ -330,13 +331,14 @@ class Board(object):
                 curr_move = Board.NOT_MOVED
 
             if move_end < 0:
-                return self._inactive_player, move_history, "timeout"
+                return self._inactive_player, move_history, "timeout",state_history
 
             if curr_move not in legal_player_moves:
                 if len(legal_player_moves) > 0:
-                    return self._inactive_player, move_history, "forfeit"
-                return self._inactive_player, move_history, "illegal move"
+                    return self._inactive_player, move_history, "forfeit",state_history
+                return self._inactive_player, move_history, "illegal move",state_history
 
             move_history.append(list(curr_move))
+            state_history.append(list(self._board_state))
 
             self.apply_move(curr_move)

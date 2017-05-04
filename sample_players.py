@@ -251,7 +251,64 @@ class HumanPlayer():
 
         return legal_moves[index]
     
+   
+def to_string(state, symbols=['1', '2']): #stolen from isolation.py
+    """Generate a string representation of the current game state, marking
+    the location of each player and indicating which cells have been
+    blocked, and which remain open.
+    """
+    p1_loc = state[-1]
+    p2_loc = state[-2]
     
+    col_margin = len(str(7 - 1)) + 1
+    prefix = "{:<" + "{}".format(col_margin) + "}"
+    offset = " " * (col_margin + 3)
+    out = offset + '   '.join(map(str, range(7))) + '\n\r'
+    for i in range(7):
+        out += prefix.format(i) + ' | '
+        for j in range(7):
+            idx = i + j * 7
+            if not state[idx]:
+                out += ' '
+            elif p1_loc == idx:
+                out += symbols[0]
+            elif p2_loc == idx:
+                out += symbols[1]
+            else:
+                out += '-'
+            out += ' | '
+        out += '\n\r'
+    
+    return out
+def save_game(state_hist,winner,game_id):
+    """ Save the state of the game and the winner 
+    preserve the game to a file for later analysis
+    each row in the file is the game state.
+    row has format [gamestate],player_num_of_winner
+    """
+    import pickle
+    try:
+        with open(game_id, 'wb') as f:
+            pickle.dump((state_hist,winner),f)
+    except:
+        return "failed"
+    return "success"
+
+def load_game(game_id):
+    """ load the state of the game and the winner 
+    load the game from a file for later analysis
+    each row in the file is the game state.
+    row has format [gamestate],player_num_of_winner
+    """
+    import pickle
+    try:
+        with open(game_id, 'rb') as f:
+            state=pickle.load(f)
+    except:
+        return "failed",_
+    return "success",state
+
+
 from game_agent import (MinimaxPlayer, AlphaBetaPlayer, custom_score,
                         custom_score_2, custom_score_3)
 
@@ -288,7 +345,46 @@ if __name__ == "__main__":
 
     # play the remainder of the game automatically -- outcome can be "illegal
     # move", "timeout", or "forfeit"
-    winner, history, outcome = game.play()
+    winner, history, outcome,state_hist = game.play()
     print("\nWinner: {}\nOutcome: {}".format(winner, outcome))
     print(game.to_string())
     print("Move history:\n{!s}".format(history))
+    
+    #game history
+    player1_moves=[]
+    player1_states=[]
+    player2_moves=[]
+    player2_states=[]
+    for i in range(len(history)):
+        if i%2 ==0:
+            player1_moves.append(history[i])
+            player1_states.append(state_hist[i])
+        else:
+            player2_moves.append(history[i])
+            player2_states.append(state_hist[i])
+            
+    print(len(player1_moves),len(player2_moves))
+    #print the players next move and the current board
+    if len(player1_moves)==len(player2_moves):
+        for i in range(len(player1_moves)):
+            print('player1:{}\n{} \n player2:{}\n{}'.format(player1_moves[i],player1_states[i],player2_moves[i],player2_states[i]))
+    else:
+        if len(player1_moves)>len(player2_moves):
+            for i in range(len(player2_moves)):
+                print('player1:{}\n{} \nplayer2:{}\n{}'.format(player1_moves[i],to_string(player1_states[i]),player2_moves[i],to_string(player2_states[i])))
+            print(' player1:{}\n{}'.format(player1_moves[i+1],to_string(player1_states[i+1])))
+
+        else:
+            for i in range(len(player1_moves)):
+                print('player1:{}\n{}\n player2:{}\n{}'.format(player1_moves[i],player1_states[i],player2_moves[i],player2_states[i]))
+            print('       player2:{}{}'.format(player2_moves[i+1],player2_states[i]))
+
+    print("final state:\n",game.to_string())
+    if winner == game._player_1:
+        print(save_game(state_hist,1,"sample_players.pckl"))
+    else:
+        print(save_game(state_hist,2,"sample_players.pckl"))
+    
+    result,state=load_game("sample_players.pckl")
+    
+    print(result,"test:\n",state)
