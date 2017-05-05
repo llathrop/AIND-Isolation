@@ -3,13 +3,16 @@
 We will use this script to process the played games and generate a model to 
 predict likelynesss to win
 """
-import os,sys,time,random,math,time
+import os,sys,time,random,math
 
 import numpy as np # linear algebra
 import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
 
-from sklearn.linear_model import LinearRegression
-from sklearn.cross_validation import train_test_split, StratifiedShuffleSplit
+from sklearn.ensemble import ExtraTreesRegressor
+from sklearn.metrics import make_scorer, mean_absolute_error
+from sklearn.grid_search import GridSearchCV
+
+from sklearn.cross_validation import train_test_split
 from sklearn.externals import joblib
 
 datadir="./game_state_data/"  #where the game data was saved
@@ -72,10 +75,11 @@ def load_games_from_dir(datadir):
     #loading game data from files, and create single list
     games_data=[]
     print("Sample files seen",files[:4])
-    for game_file in files[:]:
+    for game_file in files:
         load_result,game_data=load_game(datadir+game_file)
         if load_result:
             for turn in game_data[0]:
+                #(turn[:-1]+1)*-1
                 turn.append(game_data[1])
                 games_data.append(turn)
         else:
@@ -87,10 +91,95 @@ def load_games_from_dir(datadir):
     labels.append('winner')
     return pd.DataFrame.from_records(games_data,columns=labels)
 
-                
+
+def grid_search_wrapper(x,y,regr,param,regr_name='BLANK',cachedir="./"):
+    start_time = time.time()
+    print("In:{}".format(regr))
+    filename= 'grid_{}.pkl'.format(regr_name)
+    if os.path.isfile(cachedir+filename):
+        print(filename," exists, importing ")
+        return joblib.load(cachedir+filename) 
+    else:
+        print("{} not present, running a gridsearch".format(filename))
+        #search the param_grid for best params based on the f1 score
+        grid_search = GridSearchCV(regr,
+                                   param_grid= param,
+                                   n_jobs=-1,
+                                   scoring=make_scorer(mean_absolute_error,greater_is_better=False)) 
+        print("begin gridsearch training")
+        grid_search.fit(x,y)
+        print("end gridsearch training")
+        #reach into the grid search and pull out the best parameters, and set those on the clf
+        params={}
+        for p in grid_search.best_params_:
+            params[p]=grid_search.best_params_[p]
+        regr.set_params(**params)
+        print("run time:{}s".format(round((time.time()-start_time), 3) ))   
+        joblib.dump(regr,cachedir+filename) 
+    return regr
         
         
 if __name__ == "__main__":
     game_states_labeled=load_games_from_dir(datadir)
     print(game_states_labeled.info())
     
+    x=game_states_labeled.drop('winner',1).values
+    y=game_states_labeled['winner'].values
+    
+    #  train/validation split
+    X_train, X_validation, y_train, y_validation = train_test_split( x,
+                                                                    y,
+                                                                   test_size=0.20,
+                                                                    random_state=42)
+    print("sample train data size:{}".format(len(y_train)))
+    
+
+    #estimator=LinearRegression(n_jobs=-1)
+    #poor prediction performance
+   
+    #estimator=KNeighborsRegressor(n_jobs = -1)
+    #Knn was slow and didn't predict acuratly enough to bother with 
+   
+    #estimator=RandomForestRegressor(n_jobs =-1, random_state=42)
+    #essentially the same as extra trees with slightly worse performance
+    
+    #estimator=svr()
+    #absolutly horrible train/predict time, and no better performance than Linear
+    
+
+    print("\nstart ExtraTrees:")   
+    estimator=ExtraTreesRegressor(n_jobs =-1)
+    print("default params of estimator",estimator)
+    #use grid search to spot the best params
+    param=dict(n_estimators=[3,5,7,10,25,50,200,500], max_features=['auto','sqrt','log2'])
+    estimator=grid_search_wrapper(X_train,y_train,estimator,param,regr_name='ExtraTrees')
+    
+    #train the estimator
+    start_time = time.time()
+    estimator.fit(X_train,y_train)
+    fit_time=time.time()-start_time
+    print("fit time:{}s".format(round(fit_time, 3) ))
+    #test on the validation set
+    start_time = time.time()
+    curr_predict=np.array(estimator.predict(X_validation)).copy()
+    predict_time=time.time()-start_time
+    print("predict time:{}s".format(round(predict_time, 3) ))    
+    #track the run info
+    MAE=np.mean(abs(curr_predict - y_validation))
+    print("Mean abs error: {:.2f}".format(MAE))
+    #retrain estimator with all data for final model
+    estimator.fit(x,y)
+    joblib.dump(estimator,"./trained_score_model.joblib")
+
+  
+    #print(2-curr_predict[:5])
+    #print(curr_predict[:5])
+    #for cp in curr_predict:
+        #if cp <=1 or cp>=2:
+            #print(cp)
+    #for i in range(10):
+        #print(curr_predict[i], y_validation[i])
+    #for x in X_validation[:10]:
+        #print(to_string(list(x)))
+        
+        

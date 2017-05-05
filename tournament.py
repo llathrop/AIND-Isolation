@@ -11,9 +11,7 @@ players, and the players play each match twice -- once as the first player and
 once as the second player.  Randomizing the openings and switching the player
 order corrects for imbalances due to both starting position and initiative.
 """
-import itertools
-import random
-import warnings
+import itertools, random, warnings, time
 
 from collections import namedtuple
 
@@ -23,7 +21,7 @@ from sample_players import (RandomPlayer, open_move_score,
 from game_agent import (MinimaxPlayer, AlphaBetaPlayer, custom_score,
                         custom_score_2, custom_score_3)
 
-NUM_MATCHES = 500  # number of matches against each opponent
+NUM_MATCHES = 10  # number of matches against each opponent
 TIME_LIMIT = 150  # number of milliseconds before timeout
 
 DESCRIPTION = """
@@ -45,8 +43,8 @@ def save_game(state_hist,winner,game_file):
         with open(game_file, 'wb') as f:
             pickle.dump((state_hist,winner),f)
     except:
-        return "failed"
-    return "success"
+        return False
+    return True
 
 def load_game(game_file):
     """ load the state of the game and the winner 
@@ -59,8 +57,8 @@ def load_game(game_file):
         with open(game_file, 'rb') as f:
             state=pickle.load(f)
     except:
-        return "failed",_
-    return "success",state
+        return False,([0],0)
+    return True,state
 
 def play_round(cpu_agent, test_agents, win_counts, num_matches):
     """Compare the test agents to the cpu agent in "fair" matches.
@@ -157,7 +155,7 @@ def play_matches(cpu_agents, test_agents, num_matches):
 
 
 def main():
-
+    start_time = time.time()
     # Define two agents to compare -- these agents will play from the same
     # starting position against the same adversaries in the tournament
     test_agents = [
@@ -183,7 +181,9 @@ def main():
     print("{:^74}".format("Playing Matches"))
     print("{:^74}".format("*************************"))
     play_matches(cpu_agents, test_agents, NUM_MATCHES)
-
+    
+    tournament_time=time.time()-start_time
+    print("Tournament time time:{}s".format(round(tournament_time, 3) )) 
 
 if __name__ == "__main__":
     main()

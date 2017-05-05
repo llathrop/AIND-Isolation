@@ -152,7 +152,7 @@ class IsolationPlayer:
         positive value large enough to allow the function to return before the
         timer expires.
     """
-    def __init__(self, search_depth=3, score_fn=custom_score, timeout=10.):
+    def __init__(self, search_depth=3, score_fn=custom_score, timeout=15.):
         self.search_depth = search_depth
         self.score = score_fn
         self.time_left = None
@@ -324,10 +324,10 @@ class AlphaBetaPlayer(IsolationPlayer):
         self.time_left = time_left
 
         best_move = (-1, -1)
-
+        max_depth = len(game.get_blank_spaces())
         try:
             # https://github.com/aimacode/aima-pseudocode/blob/master/md/Iterative-Deepening-Search.md
-            for depth in range(1, 30):
+            for depth in range(1, max_depth):
                 best_move = self.alphabeta(game, depth)
         except SearchTimeout:
             pass
