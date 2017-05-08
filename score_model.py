@@ -8,7 +8,7 @@ import os,sys,time,random,math
 import numpy as np # linear algebra
 import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
 
-from sklearn.ensemble import ExtraTreesRegressor
+from sklearn.ensemble import ExtraTreesRegressor,ExtraTreesClassifier
 from sklearn.metrics import make_scorer, mean_absolute_error
 from sklearn.grid_search import GridSearchCV
 
@@ -95,7 +95,7 @@ def load_games_from_dir(datadir):
 def grid_search_wrapper(x,y,regr,param,regr_name='BLANK',cachedir="./"):
     start_time = time.time()
     print("In:{}".format(regr))
-    filename= 'grid_{}.pkl'.format(regr_name)
+    filename= 'grid_{}.joblib'.format(regr_name)
     if os.path.isfile(cachedir+filename):
         print(filename," exists, importing ")
         return joblib.load(cachedir+filename) 
@@ -149,11 +149,14 @@ if __name__ == "__main__":
 
     print("\nstart ExtraTrees:")   
     estimator=ExtraTreesRegressor(n_jobs =-1)
+    estimator=ExtraTreesClassifier(n_jobs =-1)
+    
     print("default params of estimator",estimator)
     #use grid search to spot the best params
-    param=dict(n_estimators=[3,5,7,10,25,50,200,500], max_features=['auto','sqrt','log2'])
+    #param=dict(n_estimators=[3,5,7,10,25,50,200,500], max_features=['auto','sqrt','log2'])
+    param=dict(n_estimators=[3,10,50], max_features=['auto'])
     estimator=grid_search_wrapper(X_train,y_train,estimator,param,regr_name='ExtraTrees')
-    
+    print("post grid search params of est",estimator)
     #train the estimator
     start_time = time.time()
     estimator.fit(X_train,y_train)
@@ -170,6 +173,9 @@ if __name__ == "__main__":
     #retrain estimator with all data for final model
     estimator.fit(x,y)
     joblib.dump(estimator,"./trained_score_model.joblib")
+    
+    print(estimator.classes_)
+    print(estimator.feature_importances_)
 
   
     #print(2-curr_predict[:5])

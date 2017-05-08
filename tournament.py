@@ -21,8 +21,9 @@ from sample_players import (RandomPlayer, open_move_score,
 from game_agent import (MinimaxPlayer, AlphaBetaPlayer, custom_score,
                         custom_score_2, custom_score_3)
 
-NUM_MATCHES = 10  # number of matches against each opponent
+NUM_MATCHES = 5  # number of matches against each opponent
 TIME_LIMIT = 150  # number of milliseconds before timeout
+SAVE_GAME=False
 
 DESCRIPTION = """
 This script evaluates the performance of the custom_score evaluation function
@@ -86,10 +87,11 @@ def play_round(cpu_agent, test_agents, win_counts, num_matches):
             winner, _, termination,state_hist = game.play(time_limit=TIME_LIMIT)
             win_counts[winner] += 1
             filename="./game_state_data/game_state"+str(random.randint(1, 1000000000))+str(win_counts[winner])+".pckl"
-            if winner == game._player_1:
+            if winner == game._player_1 and SAVE_GAME==True:
                 save_game(state_hist,1,filename)
             else:
-                save_game(state_hist,2,filename)
+                if SAVE_GAME==True:
+                    save_game(state_hist,2,filename)
 
         if termination == "timeout":
             timeout_count += 1

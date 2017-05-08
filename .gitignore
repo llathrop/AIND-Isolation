@@ -99,6 +99,10 @@ ENV/
 #frm udacity submit
 .json
 #pickle
-.pckl
+*.pckl
+*.pkl
+*.joblib
+# games_state
+game_state_data/
 
 # End of https://www.gitignore.io/api/python

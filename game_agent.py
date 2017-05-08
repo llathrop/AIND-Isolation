@@ -2,8 +2,15 @@
 test your agent's strength against a set of known agents using tournament.py
 and include the results in your report.
 """
-import random
+import random,math
 
+#removed from use! but left as a demo of what is needed to use a class predictor
+#from sklearn.externals import joblib
+#from sklearn.ensemble import ExtraTreesRegressor
+
+#print("loading estimator")
+#score_estimator=joblib.load("./trained_score_model.joblib") 
+#print("loaded est")
 
 class SearchTimeout(Exception):
     """Subclass base exception for code clarity. """
@@ -42,15 +49,27 @@ def custom_score(game, player):
 
     if game.is_winner(player):
         return float("inf")
-    
+    #unused but left as an example of how a class predictor might be implemented
+    #obtain the probability that a result is a winner
+    #result_est=score_estimator.predict_proba([list(game._board_state),])
+    #if player==game._player_1 :
+   #     result_est=result_est[0][0]
+   # else:
+     #   if len(score_estimator.classes_) > 1:
+      #      result_est=result_est[0][1]
+       # else:
+        #    result_est=0
     
     own_moves = len(game.get_legal_moves(player))
     opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
     
-    moves_left = len(game.get_blank_spaces())
+    empty_board = len(game.get_blank_spaces())
     
-    return float(own_moves**2 - opp_moves**2)/moves_left**2
-
+    #unused but left as an example of how a class predictor might be implemen
+    #result_orig=float((own_moves**2) - (opp_moves**2))
+    #result_est = (result_est*result_orig)/moves_left
+    
+    return (float(own_moves**2 - opp_moves**2)/empty_board)
 
 def custom_score_2(game, player):
     """Calculate the heuristic value of a game state from the point of view
@@ -75,7 +94,7 @@ def custom_score_2(game, player):
         The heuristic value of the current game state to the specified player.
     """
     # TODO: finish this function!
-    # emphasize the end game by using the game length
+    # emphasize the end game by using the board population
     if game.is_loser(player):
         return float("-inf")
 
@@ -86,9 +105,14 @@ def custom_score_2(game, player):
     own_moves = len(game.get_legal_moves(player))
     opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
         
-    moves_left = len(game.get_blank_spaces())
-    
-    return float(own_moves - opp_moves)/moves_left
+    empty_board = len(game.get_blank_spaces()) 
+    moves_left= own_moves+opp_moves
+    result=float(own_moves**2 - opp_moves**2)/(moves_left+empty_board)
+    return result
+
+    #plainest version
+    #return float(own_moves - opp_moves)/empty_board 
+
 
 def custom_score_3(game, player):
     """Calculate the heuristic value of a game state from the point of view
@@ -113,7 +137,7 @@ def custom_score_3(game, player):
         The heuristic value of the current game state to the specified player.
     """
     # TODO: finish this function!
-    # give more granularity to diff btwn moves left.
+    # use total moves left to emphasize end game.
     if game.is_loser(player):
         return float("-inf")
 
@@ -123,8 +147,15 @@ def custom_score_3(game, player):
     
     own_moves = len(game.get_legal_moves(player))
     opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
-        
-    return float(own_moves**2 - opp_moves**2)
+    
+    empty_board = len(game.get_blank_spaces())   
+    moves_left= own_moves+opp_moves
+    result=float(own_moves**2 - opp_moves**2)/moves_left
+    
+
+    
+    return result
+
 
 
 
@@ -152,7 +183,7 @@ class IsolationPlayer:
         positive value large enough to allow the function to return before the
         timer expires.
     """
-    def __init__(self, search_depth=3, score_fn=custom_score, timeout=15.):
+    def __init__(self, search_depth=3, score_fn=custom_score, timeout=10.):
         self.search_depth = search_depth
         self.score = score_fn
         self.time_left = None
@@ -323,8 +354,14 @@ class AlphaBetaPlayer(IsolationPlayer):
         """
         self.time_left = time_left
 
-        best_move = (-1, -1)
-        max_depth = len(game.get_blank_spaces())
+        legal_moves = game.get_legal_moves()
+        if not legal_moves or len(legal_moves)==0:
+             best_move =  (-1, -1)
+        else:
+             best_move = legal_moves[0]
+           
+        max_depth = len(game.get_blank_spaces())+1
+        
         try:
             # https://github.com/aimacode/aima-pseudocode/blob/master/md/Iterative-Deepening-Search.md
             for depth in range(1, max_depth):
