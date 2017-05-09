@@ -201,7 +201,7 @@ class IsolationPlayer:
         positive value large enough to allow the function to return before the
         timer expires.
     """
-    def __init__(self, search_depth=3, score_fn=custom_score, timeout=12.):
+    def __init__(self, search_depth=3, score_fn=custom_score, timeout=13.):
         self.search_depth = search_depth
         self.score = score_fn
         self.time_left = None
