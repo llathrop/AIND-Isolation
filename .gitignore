@@ -95,9 +95,9 @@ ENV/
 .ropeproject
 
 #compressed
-.zip
+*.zip
 #frm udacity submit
-.json
+*.json
 #pickle
 *.pckl
 *.pkl

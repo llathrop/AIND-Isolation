@@ -17,7 +17,7 @@ class SearchTimeout(Exception):
     pass
 
 
-def custom_score(game, player):
+def custom_score_3(game, player):
     """Calculate the heuristic value of a game state from the point of view
     of the given player.
 
@@ -49,25 +49,36 @@ def custom_score(game, player):
 
     if game.is_winner(player):
         return float("inf")
-    #unused but left as an example of how a class predictor might be implemented
-    #obtain the probability that a result is a winner
-    #result_est=score_estimator.predict_proba([list(game._board_state),])
-    #if player==game._player_1 :
-   #     result_est=result_est[0][0]
-   # else:
-     #   if len(score_estimator.classes_) > 1:
-      #      result_est=result_est[0][1]
-       # else:
-        #    result_est=0
+   
     
     own_moves = len(game.get_legal_moves(player))
     opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
     
     empty_board = len(game.get_blank_spaces())
     
-    #unused but left as an example of how a class predictor might be implemen
-    #result_orig=float((own_moves**2) - (opp_moves**2))
-    #result_est = (result_est*result_orig)/moves_left
+    #version using the state of the board
+    #return float(own_moves - opp_moves)/empty_board 
+    
+    # a more complex version using moves left on the board
+    #return float(own_moves**2 - opp_moves**2)/moves_left
+    
+    #unused but left as an example of how a class predictor might be implemented
+    # This was to slow to perform with timelimits, but seems structurally correct
+    #obtain the probability that a result is a winner
+    #result_est=score_estimator.predict_proba([list(game._board_state),])
+    #if player==game._player_1 :
+    #     result_est=result_est[0][0]
+    #else:
+    #     if len(score_estimator.classes_) > 1:
+    #        result_est=result_est[0][1]
+    #     else:
+    #        result_est=0
+    #result_orig=(float(own_moves**2 - opp_moves**2)/empty_board)
+    #result = float(result_est*result_orig)/moves_left
+    
+
+    
+
     
     return (float(own_moves**2 - opp_moves**2)/empty_board)
 
@@ -94,7 +105,8 @@ def custom_score_2(game, player):
         The heuristic value of the current game state to the specified player.
     """
     # TODO: finish this function!
-    # emphasize the end game by using the board population
+    # emphasize the end game by using the gthe board population and moves left,
+    # but de-emphazize moves left affect by squaring the scores
     if game.is_loser(player):
         return float("-inf")
 
@@ -110,11 +122,8 @@ def custom_score_2(game, player):
     result=float(own_moves**2 - opp_moves**2)/(moves_left+empty_board)
     return result
 
-    #plainest version
-    #return float(own_moves - opp_moves)/empty_board 
 
-
-def custom_score_3(game, player):
+def custom_score(game, player):
     """Calculate the heuristic value of a game state from the point of view
     of the given player.
 
@@ -137,7 +146,11 @@ def custom_score_3(game, player):
         The heuristic value of the current game state to the specified player.
     """
     # TODO: finish this function!
-    # use total moves left to emphasize end game.
+    # in the first half of the game, penalize being near the center, while 
+    # otherwise use the normal scoring. In rest of game, emphasize the end game
+    #by using the gthe board population and moves left, but de-emphazize moves
+    #left effect by squaring the scores
+    
     if game.is_loser(player):
         return float("-inf")
 
@@ -150,15 +163,17 @@ def custom_score_3(game, player):
     
     empty_board = len(game.get_blank_spaces())   
     moves_left= own_moves+opp_moves
-    result=float(own_moves**2 - opp_moves**2)/moves_left
+    result=float(own_moves**2 - opp_moves**2)/(moves_left+empty_board)
     
-
+    player_y1, player_x1 = game.get_player_location(player) 
+    board_center_y,board_center_x=(game.height/2,game.width/2) #rough board center
+    
+    if (game.height*game.width)/2 <= empty_board: # if the board is half available
+             if (player_y1>board_center_y-2 and player_y1<board_center_y+2) and (player_x1>board_center_x-2 and player_x1<board_center_x+2):
+                 result=float((own_moves-1)**2 - opp_moves**2)/(moves_left+empty_board) #reward being near center
+        
     
     return result
-
-
-
-
 
 
 class IsolationPlayer:
@@ -183,7 +198,7 @@ class IsolationPlayer:
         positive value large enough to allow the function to return before the
         timer expires.
     """
-    def __init__(self, search_depth=3, score_fn=custom_score, timeout=10.):
+    def __init__(self, search_depth=3, score_fn=custom_score, timeout=12.):
         self.search_depth = search_depth
         self.score = score_fn
         self.time_left = None
@@ -283,10 +298,13 @@ class MinimaxPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
         # TODO: finish this function!
-        
+
         legal_moves = game.get_legal_moves()
-    
-        best_move = (-1, -1)
+        if not legal_moves or len(legal_moves)==0:
+             best_move =  (-1, -1)
+        else:
+             best_move = legal_moves[0]
+           
         best_score = float("-inf")
         
         for move in legal_moves:
@@ -411,10 +429,11 @@ class AlphaBetaPlayer(IsolationPlayer):
             raise SearchTimeout()
 
         legal_moves = game.get_legal_moves()
-        if not legal_moves:
-            return (-1, -1)
-
-        best_move = legal_moves[0]
+        if not legal_moves or len(legal_moves)==0:
+             best_move =  (-1, -1)
+        else:
+             best_move = legal_moves[0]
+           
         best_score = float("-inf")
         
         for move in game.get_legal_moves():
