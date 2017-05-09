@@ -75,7 +75,7 @@ def load_games_from_dir(datadir):
     #loading game data from files, and create single list
     games_data=[]
     print("Sample files seen",files[:4])
-    for game_file in files:
+    for game_file in files[:1000]:
         load_result,game_data=load_game(datadir+game_file)
         if load_result:
             for turn in game_data[0]:

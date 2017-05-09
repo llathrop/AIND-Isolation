@@ -5,12 +5,12 @@ and include the results in your report.
 import random,math
 
 #removed from use! but left as a demo of what is needed to use a class predictor
-#from sklearn.externals import joblib
-#from sklearn.ensemble import ExtraTreesRegressor
+from sklearn.externals import joblib
+#rom sklearn.ensemble import ExtraTreesRegressor
 
-#print("loading estimator")
-#score_estimator=joblib.load("./trained_score_model.joblib") 
-#print("loaded est")
+print("loading estimator")
+score_estimator=joblib.load("./trained_score_model.joblib") 
+print("loaded est")
 
 class SearchTimeout(Exception):
     """Subclass base exception for code clarity. """
@@ -56,6 +56,8 @@ def custom_score_3(game, player):
     
     empty_board = len(game.get_blank_spaces())
     
+    #moves_left= own_moves+opp_moves
+    
     #version using the state of the board to emphasize the end game 
     #return float(own_moves - opp_moves)/empty_board 
     
@@ -73,10 +75,11 @@ def custom_score_3(game, player):
     #        result_est=result_est[0][1]
     #     else:
     #        result_est=0
-    #result_orig=(float(own_moves**2 - opp_moves**2)/empty_board)
-    #result = float(result_est*result_orig)/moves_left
-    
-    return (float(own_moves**2 - opp_moves**2)/empty_board)
+    #result_orig=(float(own_moves**2 - opp_moves**2))
+    #result = float(result_est*result_orig)/(moves_left+empty_board)
+    #return result
+
+    return float(own_moves - opp_moves)/empty_board
 
 def custom_score_2(game, player):
     """Calculate the heuristic value of a game state from the point of view
@@ -161,14 +164,18 @@ def custom_score(game, player):
     moves_left= own_moves+opp_moves
     result=float(own_moves**2 - opp_moves**2)/(moves_left+empty_board)
     
-    player_y1, player_x1 = game.get_player_location(player) 
-    board_center_y,board_center_x=(game.height/2,game.width/2) #rough board center
+    #player_y1, player_x1 = game.get_player_location(player) 
+    #board_center_y,board_center_x=(game.height/2,game.width/2) #rough board center
     
-    if (game.height*game.width)/2 <= empty_board: # if the board is half available
-             if (player_y1>board_center_y-2 and player_y1<board_center_y+2) and (player_x1>board_center_x-2 and player_x1<board_center_x+2):
-                 result=float((own_moves-1)**2 - opp_moves**2)/(moves_left+empty_board) #reward being near center
+    w, h = game.width, game.height
+    y, x = game.get_player_location(player)
         
-    
+    if (game.height*game.width)/2 <= empty_board: # if the board is half available
+             #if (player_y1>board_center_y-2 and player_y1<board_center_y+2) and (player_x1>board_center_x-2 and player_x1<board_center_x+2):
+                 #result=float((own_moves-1)**2 - opp_moves**2)/(moves_left+empty_board) #reward being near center
+             center_score = float((h - y)**2 + (w - x)**2)    #frm sample_players.py:def center_score()
+             result=float((own_moves+center_score)**2 - opp_moves**2)/(moves_left+empty_board) #reward being near center
+                 
     return result
 
 
