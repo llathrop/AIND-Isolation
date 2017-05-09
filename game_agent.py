@@ -56,7 +56,7 @@ def custom_score_3(game, player):
     
     empty_board = len(game.get_blank_spaces())
     
-    #version using the state of the board
+    #version using the state of the board to emphasize the end game 
     #return float(own_moves - opp_moves)/empty_board 
     
     # a more complex version using moves left on the board
@@ -75,10 +75,6 @@ def custom_score_3(game, player):
     #        result_est=0
     #result_orig=(float(own_moves**2 - opp_moves**2)/empty_board)
     #result = float(result_est*result_orig)/moves_left
-    
-
-    
-
     
     return (float(own_moves**2 - opp_moves**2)/empty_board)
 
