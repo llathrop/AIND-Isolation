@@ -17,7 +17,7 @@ class SearchTimeout(Exception):
     pass
 
 
-def custom_score_3(game, player):
+def custom_score_4(game, player):
     """Calculate the heuristic value of a game state from the point of view
     of the given player.
 
@@ -156,27 +156,74 @@ def custom_score(game, player):
     if game.is_winner(player):
         return float("inf")
     
+    own_moves = len(game.get_legal_moves(player))
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    
+    empty_board = len(game.get_blank_spaces())   
+    moves_left= own_moves+opp_moves
+
+    w, h = game.width, game.height
+    y, x = game.get_player_location(player)
+        
+    if (game.height*game.width)/2 <= empty_board: # if the board is half available
+        center_score = float((h - y)**2 + (w - x)**2)    #frm sample_players.py:def center_score()
+        result=float((own_moves+center_score)**2 - opp_moves**2)/(moves_left+empty_board) #reward being near center
+    else:
+        result=float(own_moves**2 - opp_moves**2)/(moves_left+empty_board)
+    return result
+
+def custom_score_3(game, player): #TEMP VERSION
+    """Calculate the heuristic value of a game state from the point of view
+    of the given player.
+
+    Note: this function should be called from within a Player instance as
+    `self.score()` -- you should not need to call this function directly.
+
+    Parameters
+    ----------
+    game : `isolation.Board`
+        An instance of `isolation.Board` encoding the current state of the
+        game (e.g., player locations and blocked cells).
+
+    player : object
+        A player instance in the current game (i.e., an object corresponding to
+        one of the player objects `game.__player_1__` or `game.__player_2__`.)
+
+    Returns
+    -------
+    float
+        The heuristic value of the current game state to the specified player.
+    """
+    # TODO: finish this function!
+    # in the first half of the game, penalize being near the center, while 
+    # otherwise use the normal scoring. In rest of game, emphasize the end game
+    #by using the gthe board population and moves left, but de-emphazize moves
+    #left effect by squaring the scores
+    
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
     
     own_moves = len(game.get_legal_moves(player))
     opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
     
     empty_board = len(game.get_blank_spaces())   
     moves_left= own_moves+opp_moves
-    result=float(own_moves**2 - opp_moves**2)/(moves_left+empty_board)
-    
-    #player_y1, player_x1 = game.get_player_location(player) 
-    #board_center_y,board_center_x=(game.height/2,game.width/2) #rough board center
-    
+
     w, h = game.width, game.height
-    y, x = game.get_player_location(player)
-        
+    y_own, x_own = game.get_player_location(player)
+    y_opp, x_opp = game.get_player_location(game.get_opponent(player))
+    center_score_own = float((h - y_own)**2 + (w - x_own)**2)    #frm sample_players.py:def center_score()
+    center_score_opp = float((h - y_opp)**2 + (w - x_opp)**2)    #frm sample_players.py:def center_score()
+
     if (game.height*game.width)/2 <= empty_board: # if the board is half available
-             #if (player_y1>board_center_y-2 and player_y1<board_center_y+2) and (player_x1>board_center_x-2 and player_x1<board_center_x+2):
-                 #result=float((own_moves-1)**2 - opp_moves**2)/(moves_left+empty_board) #reward being near center
-             center_score = float((h - y)**2 + (w - x)**2)    #frm sample_players.py:def center_score()
-             result=float((own_moves+center_score)**2 - opp_moves**2)/(moves_left+empty_board) #reward being near center
-                 
+        result=float((own_moves+center_score_own)**2 - (opp_moves+center_score_opp)**2)/(moves_left+empty_board) #reward being near center
+    else:
+        result=float(own_moves**2 - opp_moves**2)/(moves_left+empty_board)
     return result
+
 
 
 class IsolationPlayer:
