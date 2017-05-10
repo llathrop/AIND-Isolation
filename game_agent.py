@@ -5,12 +5,12 @@ and include the results in your report.
 import random,math
 
 #removed from use! but left as a demo of what is needed to use a class predictor
-from sklearn.externals import joblib
+#from sklearn.externals import joblib
 #rom sklearn.ensemble import ExtraTreesRegressor
 
-print("loading estimator")
-score_estimator=joblib.load("./trained_score_model.joblib") 
-print("loaded est")
+#print("loading estimator")
+#score_estimator=joblib.load("./trained_score_model.joblib") 
+#print("loaded est")
 
 class SearchTimeout(Exception):
     """Subclass base exception for code clarity. """
