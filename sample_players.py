@@ -381,10 +381,10 @@ if __name__ == "__main__":
 
     print("final state:\n",game.to_string())
     if winner == game._player_1:
-        result, state=save_game(state_hist,1,"sample_players.pckl")
+        result=save_game(state_hist,1,"sample_players.pckl")
     else:
-        result, state=save_game(state_hist,2,"sample_players.pckl")
+        resul=save_game(state_hist,2,"sample_players.pckl")
     
     result,state=load_game("sample_players.pckl")
     
-    print(result,"test:\n")
+    print("test:",result)

@@ -95,10 +95,14 @@ ENV/
 .ropeproject
 
 #compressed
-.zip
+*.zip
 #frm udacity submit
-.json
+*.json
 #pickle
-.pckl
+*.pckl
+*.pkl
+*.joblib
+# games_state
+game_state_data/
 
 # End of https://www.gitignore.io/api/python
