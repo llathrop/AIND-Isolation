@@ -146,10 +146,10 @@ def custom_score(game, player):
         The heuristic value of the current game state to the specified player.
     """
     # TODO: finish this function!
-    # in the first half of the game, penalize being near the center, while 
-    # otherwise use the normal scoring. In rest of game, emphasize the end game
-    #by using the gthe board population and moves left, but de-emphazize moves
-    #left effect by squaring the scores
+    #  emphasize the end game by using the gthe board population and moves 
+    # left, but de-emphazize moves left effect by squaring the scores. 
+    # Additionally, use the center score as the game progresses as a positive 
+    # modifier
     
     if game.is_loser(player):
         return float("-inf")
