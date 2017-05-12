@@ -65,7 +65,7 @@ def custom_score_3(game, player):
     #return float(own_moves**2 - opp_moves**2)/moves_left
     
     #unused but left as an example of how a class predictor might be implemented
-    # This was to slow to perform with timelimits, but seems structurally correct
+    # This was too slow to perform with timelimits, but seems structurally correct
     #obtain the probability that a result is a winner
     #result_est=score_estimator.predict_proba([list(game._board_state),])
     #if player==game._player_1 :
