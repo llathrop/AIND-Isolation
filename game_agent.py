@@ -78,6 +78,7 @@ def custom_score_3(game, player):
     #result_orig=(float(own_moves**2 - opp_moves**2))
     #result = float(result_est*result_orig)/(moves_left+empty_board)
     #return result
+    #
 
     return float(own_moves - opp_moves)/empty_board
 
@@ -164,12 +165,9 @@ def custom_score(game, player):
 
     w, h = game.width, game.height
     y, x = game.get_player_location(player)
-        
-    if (game.height*game.width)/2 <= empty_board: # if the board is half available
-        center_score = float((h - y)**2 + (w - x)**2)    #frm sample_players.py:def center_score()
-        result=float((own_moves+center_score)**2 - opp_moves**2)/(moves_left+empty_board) #reward being near center
-    else:
-        result=float(own_moves**2 - opp_moves**2)/(moves_left+empty_board)
+    center_score = float((h - y)**2 + (w - x)**2)    #frm sample_players.py:def center_score()
+
+    result=float((own_moves+float(center_score/(moves_left+empty_board)))**2 - opp_moves**2)/(moves_left+empty_board) #reward being near center
     return result
 
 # alt version, with additional centers score for opponent. didn't lead to increased wins
@@ -182,6 +180,7 @@ def custom_score(game, player):
     #else:
     #    result=float(own_moves**2 - opp_moves**2)/(moves_left+empty_board)
     #return result
+
 
 
 
